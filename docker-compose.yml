@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+    db:
+        restart: always
+        image: postgres:alpine
+        ports:
+            - "5432:5432"
+        env_file: .env
+        volumes:
+            - twitter_db:/var/lib/postgresql/data
+            - ./db:/docker-entrypoint-initdb.d
+
+    app:
+        restart: always
+        build: ./app
+        depends_on:
+            - db
+        environment:
+            TZ: "Asia/Tokyo"
+            LOG_LEVEL: INFO
+        env_file: .env
+        volumes:
+            - ./app:/app
+        command: [python, -u, main.py]
+
+volumes:
+    twitter_db:
+        driver: local
